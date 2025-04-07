@@ -1,0 +1,6 @@
+.sidebar-root{
+    height: calc(100vh - 20px);
+    max-width: 300px;
+    width: 100%;
+    border-right: 1px solid gray;
+}
