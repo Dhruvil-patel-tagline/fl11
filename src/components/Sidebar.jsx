@@ -19,6 +19,7 @@ const Sidebar = ({ onPathChange }) => {
   const [activePath, setActivePath] = useState("");
   const [edit, setEdit] = useState({ path: "", isEdit: false, type: "" });
   const [text, setText] = useState("");
+  const [renameMode, setRenameMode] = useState({ name: "", type: "" });
 
   const handleChange = (panel) => (event, isExpanded) => {
     setExpand(isExpanded ? panel : false);
@@ -78,6 +79,7 @@ const Sidebar = ({ onPathChange }) => {
       setEdit(res[res.length - 1]);
     }
     if (!newName) return;
+    console.log(contextMenu.path);
     const updatedTree = updateNodeName(treeData, contextMenu.path, newName);
     setTreeData(updatedTree);
     handleCloseContextMenu();
@@ -85,17 +87,15 @@ const Sidebar = ({ onPathChange }) => {
 
   const handleCloseContextMenu = () => setContextMenu(null);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e, path) => {
     e.stopPropagation();
     e.preventDefault();
-    if (edit.type === "folder" && text.trim()) {
-      const newNode = { type: "folder", name: text };
-      const updatedTree = addNode(treeData, activePath, newNode);
+    const newNode = { type: edit.type, name: text };
+    if (!edit.path && text.trim()) {
+      const updatedTree = addNode(treeData, "", newNode);
       setTreeData(updatedTree);
-    }
-    if (edit.type === "file" && text.trim()) {
-      const newNode = { type: "file", name: text };
-      const updatedTree = addNode(treeData, activePath, newNode);
+    } else if (edit.type && text.trim()) {
+      const updatedTree = addNode(treeData, `/${path}`, newNode);
       setTreeData(updatedTree);
     }
     setEdit({ path: "", isEdit: false, type: "" });
@@ -156,7 +156,7 @@ const Sidebar = ({ onPathChange }) => {
                 value={text}
                 onChange={(e) => setText(e.target.value)}
               />
-              <button onClick={handleSubmit}></button>
+              <button onClick={(e) => handleSubmit(e, "")}></button>
             </form>
           )}
           <AccordionDetails
@@ -178,6 +178,10 @@ const Sidebar = ({ onPathChange }) => {
                 text={text}
                 setText={setText}
                 handleSubmit={handleSubmit}
+                renameMode={renameMode}
+                setRenameMode={setRenameMode}
+                setTreeData={setTreeData}
+                treeData={treeData}
               />
             ))}
           </AccordionDetails>
