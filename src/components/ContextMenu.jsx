@@ -20,19 +20,29 @@ const ContextMenu = ({
         zIndex: 999,
       }}
     >
-      <div
-        onClick={() => {
-          handleDelete(contextMenu.path);
-          handleCloseContextMenu();
-        }}
-      >
-        Delete
-      </div>
-      <div onClick={handleRename}>Rename</div>
-      {contextMenu.type === "folder" && (
+      {!contextMenu.type && (
         <>
           <div onClick={() => handleCreate("file")}>Create File</div>
           <div onClick={() => handleCreate("folder")}>Create Folder</div>
+        </>
+      )}
+      {contextMenu.type && (
+        <>
+          <div
+            onClick={() => {
+              handleDelete(contextMenu.path);
+              handleCloseContextMenu();
+            }}
+          >
+            Delete
+          </div>
+          <div onClick={handleRename}>Rename</div>
+          {contextMenu.type === "folder" && (
+            <>
+              <div onClick={() => handleCreate("file")}>Create File</div>
+              <div onClick={() => handleCreate("folder")}>Create Folder</div>
+            </>
+          )}
         </>
       )}
     </div>

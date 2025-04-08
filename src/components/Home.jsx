@@ -8,7 +8,7 @@ const Home = () => {
 
   return (
     <div className='home-root'>
-      <Sidebar onPathChange={setSelectedPath} />
+      <Sidebar onPathChange={setSelectedPath}  />
       <Main currentPath={selectedPath} />      
     </div>
   )

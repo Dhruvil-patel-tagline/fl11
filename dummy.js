@@ -11,7 +11,14 @@ export const initialData = [
       {
         type: "folder",
         name: "components",
-        children: [{ type: "file", name: "App.jsx" }],
+        children: [
+          { type: "file", name: "App.jsx" },
+          { type: "folder", name: "App.jsx" },
+          { type: "file", name: "zzzz.jsx" },
+          { type: "folder", name: "zzz.jsx" },
+          { type: "file", name: "bbbb.jsx" },
+          { type: "folder", name: "aaaa.jsx" },
+        ],
       },
     ],
   },
@@ -24,17 +31,33 @@ export const initialData = [
   { type: "file", name: ".gitignore" },
 ];
 
-const filter = initialData.sort((a, b) => {
-    console.log(a.type,b.type)
-  if (a.type === "folder" && b.type === "file") {
-    return -1;
-  } else if (a.type === "file" && b.type === "folder") {
-    return 1;
-  } else if (a.name > b.name) {
-    return 1;
-  } else {
-    return -1;
-  }
-});
+export const sortData = (data) => {
+  console.log(data)
+  return data.sort((a, b) => {
+    if (a.type === "folder" && b.type === "file") {
+      if (a.children) {
+        sortData(a.children);
+      }
+      return -1;
+    } else if (a.type === "file" && b.type === "folder") {
+      if (a.children) {
+        sortData(a.children);
+      }
+      return 1;
+    } else if (a.name > b.name) {
+      if (a.children) {
+        sortData(a.children);
+      }
+      return 1;
+    } else {
+      if (a.children) {
+        sortData(a.children);
+      }
+      return 0;
+    }
+  });
+};
 
-console.log(filter);
+let x = sortData(initialData);
+
+// console.log(x[2].children[0].children);

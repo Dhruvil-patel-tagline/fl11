@@ -4,3 +4,12 @@
     width: 100%;
     border-right: 1px solid gray;
 }
+
+.tree-node-file{
+    /* padding-left: 1rem; */
+    padding: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}

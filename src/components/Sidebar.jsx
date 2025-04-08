@@ -1,6 +1,6 @@
 import CreateNewFolderSharpIcon from "@mui/icons-material/CreateNewFolderSharp";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
+import NoteAddIcon from "@mui/icons-material/NoteAdd";
 import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
@@ -14,10 +14,15 @@ import { initialData } from "./utils/data";
 
 const Sidebar = ({ onPathChange }) => {
   const [treeData, setTreeData] = useState(() => sortData(initialData));
+  const [expand, setExpand] = useState(false);
   const [contextMenu, setContextMenu] = useState(null);
   const [activePath, setActivePath] = useState("");
   const [edit, setEdit] = useState({ path: "", isEdit: false, type: "" });
   const [text, setText] = useState("");
+
+  const handleChange = (panel) => (event, isExpanded) => {
+    setExpand(isExpanded ? panel : false);
+  };
 
   const handleContextMenu = (e, path, type) => {
     e.preventDefault();
@@ -80,7 +85,9 @@ const Sidebar = ({ onPathChange }) => {
 
   const handleCloseContextMenu = () => setContextMenu(null);
 
-  const handleSubmit = () => {
+  const handleSubmit = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
     if (edit.type === "folder" && text.trim()) {
       const newNode = { type: "folder", name: text };
       const updatedTree = addNode(treeData, activePath, newNode);
@@ -103,7 +110,7 @@ const Sidebar = ({ onPathChange }) => {
 
   return (
     <>
-      <div className="sidebar-root">
+      <div className="sidebar-root" style={{ height: "97vh" }}>
         {contextMenu && (
           <ContextMenu
             contextMenu={contextMenu}
@@ -113,9 +120,13 @@ const Sidebar = ({ onPathChange }) => {
             handleCreate={handleCreate}
           />
         )}
-        <Accordion>
+        <Accordion expanded={expand} onChange={handleChange("panel1")}>
           <AccordionSummary
-            onContextMenu={(e) => handleCloseContextMenu(e, "", "folder")}
+            onClick={() => {
+              setActivePath("");
+              onPathChange("");
+            }}
+            onContextMenu={handleCloseContextMenu}
             expandIcon={<ExpandMoreIcon />}
             aria-controls="panel1-content"
             id="panel1-header"
@@ -130,10 +141,12 @@ const Sidebar = ({ onPathChange }) => {
               }}
             >
               <span>FOLDER-STRUCTURE</span>
-              <span>
-                <CreateNewFolderSharpIcon onClick={handleCreateFolder} />
-                <MoreHorizIcon onClick={handleCreateFile} />
-              </span>
+              {expand && (
+                <span>
+                  <CreateNewFolderSharpIcon onClick={handleCreateFolder} />
+                  <NoteAddIcon fontSize="small" onClick={handleCreateFile} />
+                </span>
+              )}
             </div>
           </AccordionSummary>
           {edit.isEdit && !edit.path && (
@@ -146,7 +159,11 @@ const Sidebar = ({ onPathChange }) => {
               <button onClick={handleSubmit}></button>
             </form>
           )}
-          <AccordionDetails>
+          <AccordionDetails
+            style={{ minHeight: "90vh" }}
+            onContextMenu={(e) => handleContextMenu(e, activePath, "")}
+            onClick={() => setActivePath("")}
+          >
             {treeData.map((item) => (
               <TreeNode
                 key={item.name}

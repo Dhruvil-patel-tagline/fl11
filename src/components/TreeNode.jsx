@@ -18,29 +18,22 @@ const TreeNode = ({
 }) => {
   const currentPath = `${path}/${node.name}`;
   const isActive = currentPath === activePath;
-  const handleClick = () => {
+  const handleClick = (e) => {
+    e.stopPropagation();
     onPathChange(currentPath);
     setActivePath(currentPath);
-  };
-
-  const handleEnter = () => {
-    console.log("fffffff");
   };
 
   if (node.type === "file") {
     return (
       <div
-        onKeyUp={handleEnter}
+        className="tree-node-file"
         onClick={handleClick}
-        onContextMenu={(e) => onContextMenu(e, currentPath, node.type)}
-        style={{
-          paddingLeft: "1rem",
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          gap: "5px",
-          border: isActive ? "2px solid blue" : "none",
+        onContextMenu={(e) => {
+          e.stopPropagation();
+          onContextMenu(e, currentPath, "file");
         }}
+        style={{ border: isActive ? "2px solid blue" : "none" }}
       >
         <InsertDriveFileIcon fontSize="small" />
         {edit.path === node.name ? (
@@ -68,15 +61,14 @@ const TreeNode = ({
       <Accordion>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
-          onContextMenu={(e) => onContextMenu(e, currentPath, node.type)}
+          onClick={handleClick}
+          onContextMenu={(e) => {
+            e.stopPropagation();
+            onContextMenu(e, currentPath, node.type);
+          }}
           style={{ border: isActive ? "2px solid blue" : "none" }}
         >
-          {/* <div style={{display:"flex", flexDirection:"column"}}>
-        <div>{edit === node.name && <input />}</div>
-      </div> */}
-
           <div
-            onClick={handleClick}
             style={{
               display: "flex",
               alignItems: "center",
@@ -87,7 +79,17 @@ const TreeNode = ({
             {node.name}
           </div>
         </AccordionSummary>
-        <AccordionDetails style={{ paddingLeft: "1rem" }}>
+        <AccordionDetails sx={{ paddingLeft: "" }}>
+          {edit.path === node.name && edit.type === "file" && (
+            <form style={{ padding: "10px 20px", position: "relative" }}>
+              <input
+                style={{ fontSize: "18px", width: "100%", padding: "4px" }}
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+              />
+              <button onClick={handleSubmit}></button>
+            </form>
+          )}
           {node.children?.map((child) => (
             <TreeNode
               key={`${currentPath}/${child.name}`}
@@ -99,6 +101,8 @@ const TreeNode = ({
               onDelete={onDelete}
               onContextMenu={onContextMenu}
               edit={edit}
+              text={text}
+              setText={setText}
             />
           ))}
         </AccordionDetails>
