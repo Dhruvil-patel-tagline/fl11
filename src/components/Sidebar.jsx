@@ -17,6 +17,8 @@ const Sidebar = ({ onPathChange }) => {
   const [expand, setExpand] = useState(false);
   const [contextMenu, setContextMenu] = useState(null);
   const [createFile, setCreateFile] = useState({ id: false, type: "" });
+  const [renameMode, setRenameMode] = useState({ id: "", type: "" });
+  const [text, setText] = useState("");
   const [activePath, setActivePath] = useState({
     path: "",
     id: "",
@@ -24,8 +26,6 @@ const Sidebar = ({ onPathChange }) => {
     edit: false,
   });
   // const [edit, setEdit] = useState({ path: "", isEdit: false, type: "" });
-  const [text, setText] = useState("");
-  const [renameMode, setRenameMode] = useState({ id: "", type: "" });
 
   const handleChange = (panel) => (event, isExpanded) => {
     setExpand(isExpanded ? panel : false);
@@ -106,6 +106,7 @@ const Sidebar = ({ onPathChange }) => {
     if (text) {
       const newNode = { type: activePath.type, name: text };
       const updatedTree = addNewF(treeData, activePath.id, newNode);
+      console.log(updatedTree);
       setTreeData(updatedTree);
       setText("");
     }
