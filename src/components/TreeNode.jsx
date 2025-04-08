@@ -13,26 +13,32 @@ const TreeNode = ({
   setActivePath,
   onDelete,
   onContextMenu,
-  edit,
   text,
   setText,
-  handleSubmit,
   setRenameMode,
   renameMode,
   setTreeData,
   treeData,
+  handleSubmitFile,
+  createFile,
+  handleCrateFileFolder,
 }) => {
   const currentPath = `${path}/${node.name}`;
-  const isActive = currentPath === activePath;
-  const handleClick = (e) => {
+  const isActive = currentPath === activePath.path;
+
+  const handleClick = (e, node) => {
     e.stopPropagation();
     onPathChange(currentPath);
-    setActivePath(currentPath);
+    setActivePath({
+      ...activePath,
+      path: currentPath,
+      id: node.id,
+    });
   };
 
   const handleKeyDown = (e, node) => {
     if (e.key === "Enter") {
-      setRenameMode({ name: node.name, type: node.type });
+      setRenameMode({ id: node.id, type: node.type });
     }
   };
 
@@ -40,11 +46,11 @@ const TreeNode = ({
     e.preventDefault();
     e.stopPropagation();
     if (text) {
-      let x = updateNodeName(treeData, `/${node.name}`, text);
+      let x = updateNodeName(treeData, node.id, text);
       setTreeData(x);
     }
     setText("");
-    setRenameMode({ name: "", type: "" });
+    setRenameMode({ id: "", type: "" });
   };
 
   if (node.type === "file") {
@@ -52,16 +58,16 @@ const TreeNode = ({
       <AccordionSummary
         component={Box}
         className="tree-node-file"
-        onClick={handleClick}
+        onClick={(e) => handleClick(e, node)}
         onKeyDown={(e) => handleKeyDown(e, node)}
         onContextMenu={(e) => {
           e.stopPropagation();
-          onContextMenu(e, currentPath, "file");
+          onContextMenu(e, node.id, "file", currentPath);
         }}
         style={{ border: isActive ? "2px solid blue" : "none" }}
       >
         <InsertDriveFileIcon fontSize="small" />
-        {renameMode?.name === node.name && renameMode.type === node.type ? (
+        {renameMode?.id === node.id && renameMode.type === node.type ? (
           <form onSubmit={(e) => handleRename(e, node)}>
             <input value={text} onChange={(e) => setText(e.target.value)} />
             <button />
@@ -73,29 +79,17 @@ const TreeNode = ({
     );
   }
 
-
   return (
     <>
-      {/* {!edit.path && edit.isEdit && (
-        <form style={{ padding: "10px 20px", position: "relative" }}>
-          <input
-            style={{ fontSize: "18px", width: "100%", padding: "4px" }}
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-          />
-          <button onClick={(e) => handleSubmit(e, edit.path)}></button>
-        </form>
-      )} */}
-
       <Accordion>
         <AccordionSummary
           component={Box}
           expandIcon={<ExpandMoreIcon />}
-          onClick={handleClick}
+          onClick={(e) => handleClick(e, node)}
           onKeyDown={(e) => handleKeyDown(e, node)}
           onContextMenu={(e) => {
             e.stopPropagation();
-            onContextMenu(e, currentPath, node.type);
+            onContextMenu(e, node.id, node.type, currentPath);
           }}
           style={{ border: isActive ? "2px solid blue" : "none" }}
         >
@@ -107,9 +101,16 @@ const TreeNode = ({
             }}
           >
             <FolderIcon fontSize="small" />
-            {renameMode?.name === node.name && renameMode.type === node.type ? (
+            {renameMode?.id === node.id && renameMode.type === node.type ? (
               <form onSubmit={(e) => handleRename(e, node)}>
-                <input value={text} onChange={(e) => setText(e.target.value)} />
+                <input
+                  value={text}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                  onChange={(e) => setText(e.target.value)}
+                />
                 <button />
               </form>
             ) : (
@@ -118,17 +119,28 @@ const TreeNode = ({
           </div>
         </AccordionSummary>
         <AccordionDetails sx={{ paddingLeft: "" }}>
-          {edit.path === node.name && (
+          {activePath.id === node.id && activePath.edit && (
             <form style={{ padding: "10px 20px", position: "relative" }}>
               <input
                 style={{ fontSize: "18px", width: "100%", padding: "4px" }}
                 value={text}
                 onChange={(e) => setText(e.target.value)}
               />
-              <button onClick={(e) => handleSubmit(e, edit.path)}></button>
+              <button onClick={handleCrateFileFolder}></button>
             </form>
           )}
-        
+
+          {createFile.id === node.id && (
+            <form style={{ padding: "10px 20px", position: "relative" }}>
+              <input
+                style={{ fontSize: "18px", width: "100%", padding: "4px" }}
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+              />
+              <button onClick={handleSubmitFile}></button>
+            </form>
+          )}
+
           {node.children?.map((child) => (
             <TreeNode
               key={`${currentPath}/${child.name}`}
@@ -139,14 +151,15 @@ const TreeNode = ({
               setActivePath={setActivePath}
               onDelete={onDelete}
               onContextMenu={onContextMenu}
-              edit={edit}
               text={text}
               setText={setText}
-              handleSubmit={handleSubmit}
               setRenameMode={setRenameMode}
               renameMode={renameMode}
               setTreeData={setTreeData}
               treeData={treeData}
+              handleSubmitFile={handleSubmitFile}
+              createFile={createFile}
+              handleCrateFileFolder={handleCrateFileFolder}
             />
           ))}
         </AccordionDetails>

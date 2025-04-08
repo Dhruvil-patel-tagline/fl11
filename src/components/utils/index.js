@@ -24,6 +24,10 @@ export const sortData = (arr) => {
   });
 };
 
+function generateId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2);
+}
+
 const isDuplicate = (array, data) => {
   if (!array) return true;
   return array.every((node) => {
@@ -43,7 +47,7 @@ const isDuplicate = (array, data) => {
 export const addNode = (tree, targetPath, newNode, currentPath = "") => {
   if (!targetPath) {
     if (isDuplicate(tree, newNode)) {
-      return sortData([...tree, newNode]);
+      return sortData([...tree, { ...newNode, id: generateId() }]);
     }
     return tree;
   }
@@ -54,7 +58,10 @@ export const addNode = (tree, targetPath, newNode, currentPath = "") => {
         if (isDuplicate(node.children, newNode)) {
           return {
             ...node,
-            children: [...(node.children || []), newNode],
+            children: [
+              ...(node.children || []),
+              { ...newNode, id: generateId() },
+            ],
           };
         }
         return node;
@@ -70,22 +77,52 @@ export const addNode = (tree, targetPath, newNode, currentPath = "") => {
   );
 };
 
-export const updateNodeName = (tree, targetPath, newName, currentPath = "") => {
+export const addNewF = (tree, id, newNode) => {
+  if (!id) {
+    if (isDuplicate(tree, newNode)) {
+      return sortData([...tree, { ...newNode, id: generateId() }]);
+    }
+    return tree;
+  }
   return sortData(
     tree.map((node) => {
-      const nodePath = `${currentPath}/${node.name}`;
-      if (nodePath === targetPath) {
+      if (node.id === id && node.type === "folder") {
+        if (isDuplicate(node.children, newNode)) {
+          return {
+            ...node,
+            children: [
+              ...(node.children || []),
+              { ...newNode, id: generateId() },
+            ],
+          };
+        }
+        return node;
+      }
+      if (node.type === "folder" && node.children) {
+        return {
+          ...node,
+          children: addNode(node.children, id, newNode),
+        };
+      }
+      return node;
+    })
+  );
+};
+
+// export const updateNodeName = (tree, id, newName, currentPath = "") => {
+export const updateNodeName = (tree, id, newName) => {
+  return sortData(
+    tree.map((node) => {
+      // const nodePath = `${currentPath}/${node.name}`;
+      // console.log(nodePath);
+      // console.log(targetPath);
+      if (node.id === id) {
         return { ...node, name: newName };
       }
       if (node.type === "folder" && node.children) {
         return {
           ...node,
-          children: updateNodeName(
-            node.children,
-            targetPath,
-            newName,
-            nodePath
-          ),
+          children: updateNodeName(node.children, id, newName),
         };
       }
       return node;
